@@ -20,41 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-html { -webkit-text-size-adjust: 100%; }
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -159,36 +124,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="python" class="level3">
 <h3 class="anchored" data-anchor-id="python">Python</h3>
 <div id="load-and-model-python" class="cell" data-execution_count="1">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.tree <span class="im">import</span> DecisionTreeRegressor, plot_tree</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> mean_squared_error, r2_score</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">'ignore'</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Load data</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>sales_data <span class="op">=</span> pd.read_csv(<span class="st">"salesPriceData.csv"</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Prepare model data (treating zipCode as numerical)</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>model_vars <span class="op">=</span> [<span class="st">'SalePrice'</span>, <span class="st">'LotArea'</span>, <span class="st">'YearBuilt'</span>, <span class="st">'GrLivArea'</span>, <span class="st">'FullBath'</span>, </span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>              <span class="st">'HalfBath'</span>, <span class="st">'BedroomAbvGr'</span>, <span class="st">'TotRmsAbvGrd'</span>, <span class="st">'GarageCars'</span>, <span class="st">'zipCode'</span>]</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>model_data <span class="op">=</span> sales_data[model_vars].dropna()</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Split data</span></span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> model_data.drop(<span class="st">'SalePrice'</span>, axis<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> model_data[<span class="st">'SalePrice'</span>]</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size<span class="op">=</span><span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">123</span>)</span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Build decision tree</span></span>
-<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>tree_model <span class="op">=</span> DecisionTreeRegressor(max_depth<span class="op">=</span><span class="dv">3</span>, </span>
-<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>                                  min_samples_split<span class="op">=</span><span class="dv">20</span>, </span>
-<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>                                  min_samples_leaf<span class="op">=</span><span class="dv">10</span>, </span>
-<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>                                  random_state<span class="op">=</span><span class="dv">123</span>)</span>
-<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>tree_model.fit(X_train, y_train)</span>
-<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Model built with </span><span class="sc">{</span>tree_model<span class="sc">.</span>get_n_leaves()<span class="sc">}</span><span class="ss"> terminal nodes"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Model built with 8 terminal nodes</code></pre>
 </div>
@@ -200,17 +135,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="python-1" class="level3">
 <h3 class="anchored" data-anchor-id="python-1">Python</h3>
 <div id="cell-visualize-tree-python" class="cell" data-fig-height="6" data-fig-width="10" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize tree</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>plot_tree(tree_model, </span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>          feature_names<span class="op">=</span>X_train.columns,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>          filled<span class="op">=</span><span class="va">True</span>, </span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>          rounded<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>          fontsize<span class="op">=</span><span class="dv">10</span>,</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>          max_depth<span class="op">=</span><span class="dv">3</span>)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Decision Tree (zipCode as Numerical)"</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -219,7 +143,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>:::</p>
 </section>
 </section>
 <section id="feature-importance-analysis" class="level2">
@@ -275,17 +198,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="python-4" class="level3">
 <h3 class="anchored" data-anchor-id="python-4">Python</h3>
 <div id="cell-visualize-tree-cat-python" class="cell" data-fig-height="6" data-fig-width="10" data-execution_count="6">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Visualize tree with one-hot encoded zipCode</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>plot_tree(tree_model_cat, </span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>          feature_names<span class="op">=</span>X_train_cat.columns,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>          filled<span class="op">=</span><span class="va">True</span>, </span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>          rounded<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>          fontsize<span class="op">=</span><span class="dv">8</span>,</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>          max_depth<span class="op">=</span><span class="dv">4</span>)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Decision Tree (zipCode One-Hot Encoded)"</span>)</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -419,93 +331,149 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="discussion-questions-for-challenge">Discussion Questions for Challenge</h2>
 <p><strong>Your Task:</strong> Add thoughtful narrative answers to these two questions in the Discussion Questions section of your rendered HTML site.</p>
 <ol type="1">
-<li><p><strong>Numerical vs Categorical Encoding:</strong> There are two modelsin Python written above. For each language, the models differ by how zip code is modelled, either as a numerical variable or as a categorical variable. Given what you know about zip codes and real estate prices, how should zip code be modelled, numerically or categorically? Is zipcode and ordinal or non-ordinal variable?</p></li>
-<li><p><strong>R vs Python Implementation Differences:</strong> When modelling zip code as a categorical variable, the output tree and feature importance would differ quite significantly had you used R as opposed to Python. Investigate why this is the case. What does R offer that Python does not? Which language would you say does a better job of modelling zip code as a categorical variable? Can you quote the documentation at <a href="https://scikit-learn.org/stable/modules/tree.html">https://scikit-learn.org/stable/modules/tree.html</a> suggesting a weakness in the Python implementation? If so, please provide a quote from the documentation.</p></li>
-<li><p><strong>Are There Any Suggestions for Implementing Decision Trees in Python With Prioper Categorical Handling?</strong> Please poke around the Internet (AI is not as helpful with new libraries) for suggestions on how to implement decision trees in Python with better (i.e.&nbsp;not one-hot encoding) categorical handling. Please provide a link to the source and a quote from the source. There is not right answer here, but please provide a thoughtful answer, I am curious to see what you find.</p></li>
+<li><strong>Numerical vs Categorical Encoding:</strong> There are two modelsin Python written above. For each language, the models differ by how zip code is modelled, either as a numerical variable or as a categorical variable. Given what you know about zip codes and real estate prices, how should zip code be modelled, numerically or categorically? Is zipcode and ordinal or non-ordinal variable? ### 1. Numerical vs Categorical Encoding: How Should Zip Code Be Modelled?</li>
 </ol>
-</section>
-<section id="grading-rubric" class="level2">
-<h2 class="anchored" data-anchor-id="grading-rubric">Grading Rubric 🎓</h2>
-<div class="callout callout-style-default callout-important callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-<span class="screen-reader-only">Important</span>📊 What You’re Really Being Graded On
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><strong>This is an investigative report, not a coding exercise.</strong> You’re analyzing decision tree models and reporting your findings like a professional analyst would. Think of this as a brief you’d write for a client or manager about why proper variable encoding matters in machine learning.</p>
-<p><strong>What makes a great report:</strong></p>
+<p>Zip codes, by their nature, represent distinct, non-overlapping geographic areas—essentially unique “labels” for neighborhoods or regions. In the context of real estate, they do a great job at segmenting properties based on local market conditions or neighborhood effects, but this segmentation does <strong>not</strong> represent a true numerical or ordered relationship. The difference between zip codes 50010 and 50012 is not inherently meaningful in terms of value or physical distance—it’s just a difference in label.</p>
+<section id="should-zip-code-be-coded-numerically-or-categorically" class="level4">
+<h4 class="anchored" data-anchor-id="should-zip-code-be-coded-numerically-or-categorically">Should Zip Code Be Coded Numerically or Categorically?</h4>
+<p><strong>Zip code should always be modelled as a <em>categorical variable</em>, not a numerical one.</strong></p>
 <ul>
-<li><strong>Clear narrative:</strong> Tell the story of what you discovered about decision tree feature importance</li>
-<li><strong>Insightful analysis:</strong> Focus on the most interesting differences between numerical and categorical encoding</li>
-<li><strong>Professional presentation:</strong> Clean, readable, and engaging</li>
-<li><strong>Concise conclusions:</strong> No AI babble or unnecessary technical jargon</li>
-<li><strong>Human insights:</strong> Your interpretation of what the feature importance rankings actually mean (or don’t mean)</li>
-<li><strong>Documentation-based analysis:</strong> For question 2, ground your analysis in actual library documentation</li>
+<li><strong>Why not numerical?</strong><br>
+Treating zip codes as numbers (e.g., 50010, 50011, 50012) leads the model to impose an artificial sense of “distance” or order that does not actually exist between them. In our analysis, for example, the decision tree might split on “zipCode &gt; 50011.5,” which makes no real-world sense—there is no continuum in zip codes; 50012 isn’t somehow “more” or “higher” than 50010 in a property value context.</li>
+<li><strong>Why categorical?</strong><br>
+When zip code is treated as a categorical variable, each distinct code is simply a unique group, and the model is allowed to split and assign importance based solely on actual group membership, not on any mathematical comparison or order.</li>
 </ul>
-<p><strong>What we’re looking for:</strong> A compelling 1-2 minute read that demonstrates both the power of decision trees for interpretability and the critical importance of proper variable encoding. And a note on the current state of the art in decision tree implementation for categorical variables in Python.</p>
-</div>
-</div>
-<section id="questions-to-answer-for-75-grade-on-challenge" class="level3">
-<h3 class="anchored" data-anchor-id="questions-to-answer-for-75-grade-on-challenge">Questions to Answer for 75% Grade on Challenge</h3>
-<ol type="1">
-<li><strong>Numerical vs Categorical Analysis:</strong> Provide a clear, well-reasoned answer to question 1 about how zip codes should be modelled. Your answer should demonstrate understanding of why categorical variables need special treatment in decision trees.</li>
-</ol>
 </section>
-<section id="questions-to-answer-for-85-grade-on-challenge" class="level3">
-<h3 class="anchored" data-anchor-id="questions-to-answer-for-85-grade-on-challenge">Questions to Answer for 85% Grade on Challenge</h3>
+<section id="is-zip-code-ordinal-or-non-ordinal" class="level4">
+<h4 class="anchored" data-anchor-id="is-zip-code-ordinal-or-non-ordinal">Is Zip Code Ordinal or Non-Ordinal?</h4>
+<p><strong>Zip code is a <em>non-ordinal</em> categorical variable.</strong><br>
+There is no natural or meaningful order to zip codes when it comes to housing prices or most other analyses. Unlike an ordinal variable (such as a rating scale from “poor” to “excellent”), zip codes do not encode any progression or relative ranking—each one just identifies a unique area.</p>
+</section>
+<section id="practical-implication" class="level4">
+<h4 class="anchored" data-anchor-id="practical-implication">Practical Implication</h4>
+<p>If you encode zip codes as numbers, you risk <strong>seriously misleading feature importance rankings</strong> and the splits in your decision tree can become nonsensical. For meaningful and interpretable results—especially when explaining model decisions to non-technical audiences—<strong>always treat zip code as categorical.</strong></p>
+<p><strong>Bottom line:</strong><br>
+&gt; <em>Zip code is a non-ordinal categorical variable and should always be represented as categorical (not numerical) in decision tree models. Modelling it numerically can create false relationships and harm the interpretability and accuracy of your analysis.</em></p>
 <ol start="2" type="1">
-<li><strong>R vs Python Implementation Analysis:</strong> Provide a thorough analysis of question 2, including investigation of the official documentation for both <code>rpart</code> (R) and <code>sklearn.tree.DecisionTreeRegressor</code> (Python). Your analysis should explain the technical differences and provide a reasoned opinion about which implementation handles categorical variables better. You do NOT have to run R-code.</li>
+<li><strong>R vs Python Implementation Differences:</strong> When modelling zip code as a categorical variable, the output tree and feature importance would differ quite significantly had you used R as opposed to Python. Investigate why this is the case. What does R offer that Python does not? Which language would you say does a better job of modelling zip code as a categorical variable? Can you quote the documentation at <a href="https://scikit-learn.org/stable/modules/tree.html">https://scikit-learn.org/stable/modules/tree.html</a> suggesting a weakness in the Python implementation? If so, please provide a quote from the documentation. ### 2. R vs Python Implementation Differences: How Do The Languages Handle Categorical Variables in Trees?</li>
 </ol>
+<p>When it comes to decision tree models—especially with categorical features like zip code—the way R and Python (scikit-learn) handle those variables is fundamentally different, with important consequences for interpretation and feature importance.</p>
 </section>
-<section id="questions-to-answer-for-95---100-grade-on-challenge" class="level3">
-<h3 class="anchored" data-anchor-id="questions-to-answer-for-95---100-grade-on-challenge">Questions to Answer for 95% - 100% Grade on Challenge</h3>
+<section id="why-do-r-and-python-scikit-learn-give-different-results" class="level4">
+<h4 class="anchored" data-anchor-id="why-do-r-and-python-scikit-learn-give-different-results">Why Do R and Python (scikit-learn) Give Different Results?</h4>
+<ul>
+<li><strong>R (<code>rpart</code> and friends):</strong>
+<ul>
+<li>In R, libraries like <code>rpart</code> and <code>party</code> natively support categorical variables. If you declare a variable as a factor, the decision tree can split nodes based on any grouping or level of that factor. For a zip code factor with four categories, R considers all possible ways to split those categories at each node.</li>
+<li>This means the algorithm can efficiently find the optimal way to partition the zip code groups, recognizing that they have no natural order and should be treated as separate bins.</li>
+</ul></li>
+<li><strong>Python (<code>sklearn.tree.DecisionTreeRegressor</code>):</strong>
+<ul>
+<li>In scikit-learn, decision trees require all input features to be numeric. There is <strong>no native support for categorical variables.</strong></li>
+<li>The common approach is to encode categorical variables using <strong>one-hot encoding</strong> or similar strategies. Each zip code is converted into a separate binary indicator column. This can lead to a dramatic explosion in the number of features if the categorical variable has many unique values.</li>
+<li>Importantly, this approach loses the ability to perform multiway splits directly on the original categories, and the model process becomes both less efficient and less interpretable.</li>
+</ul></li>
+</ul>
+</section>
+<section id="what-does-r-offer-that-python-does-not" class="level4">
+<h4 class="anchored" data-anchor-id="what-does-r-offer-that-python-does-not">What Does R Offer That Python Does Not?</h4>
+<ul>
+<li><strong>Native Handling of Categorical Variables:</strong> R’s <code>rpart</code> recognizes factors and explores all possible groupings, leading to cleaner, more interpretable splits—particularly valuable for high-cardinality features.</li>
+<li><strong>Efficient Multiway Splits:</strong> R can split a categorical variable into any grouping of its levels, not just binary splits or dummy columns.</li>
+<li><strong>Cleaner Feature Importance:</strong> Because the splits correspond to real-world groupings (e.g., “zipCode in {50010,50012} vs {50011,50013}”), the feature importance is more natural and meaningful.</li>
+</ul>
+</section>
+<section id="which-language-does-a-better-job" class="level4">
+<h4 class="anchored" data-anchor-id="which-language-does-a-better-job">Which Language Does a Better Job?</h4>
+<p>For categorical variables, <strong>R (using <code>rpart</code> or similar libraries) does a better job</strong>. Its native treatment of factors means you get more faithful, interpretable, and efficient modeling of categorical variables like zip code, versus Python’s scikit-learn, which is forced to use brute-force encoding tricks.</p>
+</section>
+<section id="official-documentation-a-weakness-in-pythons-handling" class="level4">
+<h4 class="anchored" data-anchor-id="official-documentation-a-weakness-in-pythons-handling">Official Documentation: A Weakness in Python’s Handling</h4>
+<p>From the <a href="https://scikit-learn.org/stable/modules/tree.html">official scikit-learn decision tree documentation</a>:</p>
+<blockquote class="blockquote">
+<p>“<strong>Note:</strong> There is no support for categorical variables in scikit-learn. All features are assumed to be numeric. If your data contains categorical variables, you have to encode them yourself (e.g.&nbsp;with pandas.get_dummies, OneHotEncoder, or OrdinalEncoder).”</p>
+</blockquote>
+<p>This lack of native support is a limitation, which can both complicate the analysis and distort interpretations. In contrast, R’s approach is more robust and transparent for categorical features.</p>
+<p><strong>Summary Table:</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 26%">
+<col style="width: 25%">
+<col style="width: 47%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Feature Handling</th>
+<th>R (<code>rpart</code>)</th>
+<th>Python (<code>sklearn.tree</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Native categorical support?</td>
+<td>Yes</td>
+<td>No; must encode manually</td>
+</tr>
+<tr class="even">
+<td>Multiway splits?</td>
+<td>Yes, any grouping</td>
+<td>Not directly; splits are on dummy variables</td>
+</tr>
+<tr class="odd">
+<td>Interpretability</td>
+<td>High</td>
+<td>Lower, especially with many categories</td>
+</tr>
+<tr class="even">
+<td>Official documentation?</td>
+<td>“Works with factors”</td>
+<td>“No support for categorical variables …” (see above)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Bottom line:</strong><br>
+&gt; When your feature is truly categorical (like zip code), R’s decision tree tools give more accurate and interpretable results than Python’s default scikit-learn trees. Python’s lack of native categorical support is a widely noted weakness.</p>
 <ol start="3" type="1">
-<li><strong>Professional Presentation:</strong> Your discussion answers should be written in a professional, engaging style that would be appropriate for a business audience learning about one-hot encoding and decision trees. Avoid technical jargon and focus on practical implications. Include a specific quote from the official documentation of <code>sklearn.tree.DecisionTreeRegressor</code> that supports your analysis.</li>
+<li><strong>Are There Any Suggestions for Implementing Decision Trees in Python With Prioper Categorical Handling?</strong> Please poke around the Internet (AI is not as helpful with new libraries) for suggestions on how to implement decision trees in Python with better (i.e.&nbsp;not one-hot encoding) categorical handling. Please provide a link to the source and a quote from the source. There is not right answer here, but please provide a thoughtful answer, I am curious to see what you find. ### 3. Are There Solutions for Better Categorical Handling in Python Decision Trees?</li>
 </ol>
+<p>Python’s native scikit-learn implementation isn’t ideal for categorical features, but there <strong>are emerging tools and advances</strong> for handling this challenge. Here are practical options (as of mid-2024):</p>
+</section>
+<section id="a-catboost-gradient-boosting-with-native-categorical-support" class="level4">
+<h4 class="anchored" data-anchor-id="a-catboost-gradient-boosting-with-native-categorical-support">a) <a href="https://catboost.ai/">CatBoost</a>: Gradient Boosting with Native Categorical Support</h4>
+<p><a href="https://catboost.ai/">CatBoost</a> is a library by Yandex specifically designed for handling categorical features <strong>without one-hot encoding or label encoding tricks</strong>. Instead, it uses sophisticated algorithms (ordered target statistics) to encode categories — making modeling faster and more interpretable for high-cardinality categorical variables.</p>
+<blockquote class="blockquote">
+<p><em>“CatBoost is able to work with categorical features as is — without the need to preprocess data in order to convert values to numbers.”</em><br>
+— <a href="https://catboost.ai/en/docs/concepts/handling-categorical-features/">CatBoost documentation, Features</a></p>
+</blockquote>
+<p>CatBoost supports both classification and regression and can serve as a drop-in replacement for scikit-learn estimators. It <strong>automatically detects and processes categorical columns</strong>, providing more robust splits and feature importance for variables like zip code.</p>
+</section>
+<section id="b-lightgbm-categorical-split-support" class="level4">
+<h4 class="anchored" data-anchor-id="b-lightgbm-categorical-split-support">b) <a href="https://lightgbm.readthedocs.io/en/latest/">LightGBM</a>: Categorical Split Support</h4>
+<p><a href="https://lightgbm.readthedocs.io/en/latest/">LightGBM</a> (from Microsoft) also offers <strong>native support for categorical variables</strong> (when you provide them as integer-encoded values and mark them as categorical at fit time). This lets the algorithm find the optimal way to split categories — not just simple one-hot splits.</p>
+<blockquote class="blockquote">
+<p><em>“LightGBM can use categorical features directly (without one-hot encoding). … The categorical feature support is to partition them into different groups.”</em><br>
+— <a href="https://lightgbm.readthedocs.io/en/latest/Advanced-Topics.html#categorical-feature-support">LightGBM documentation</a></p>
+</blockquote>
+</section>
+<section id="c-histgradientboosting-scikit-learn-partial-support" class="level4">
+<h4 class="anchored" data-anchor-id="c-histgradientboosting-scikit-learn-partial-support">c) <a href="https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting">HistGradientBoosting (scikit-learn)</a>: Partial Support</h4>
+<p>Recent versions of scikit-learn (since 1.0) offer histogram-based gradient boosting models with a <code>categorical_features</code> argument. This isn’t available for classic <code>DecisionTreeRegressor</code>, but it’s an option when using <code>HistGradientBoostingRegressor</code>:</p>
+<blockquote class="blockquote">
+<p><em>“Categorical features can be specified to be treated as categorical directly, without preprocessing, when using the histogram-based gradient boosting estimators.”</em><br>
+— <a href="https://scikit-learn.org/stable/modules/ensemble.html#categorical-features-support">scikit-learn documentation</a></p>
+</blockquote>
+</section>
+<section id="d-sklearn-tree-extension-research-tools-and-extensions" class="level4">
+<h4 class="anchored" data-anchor-id="d-sklearn-tree-extension-research-tools-and-extensions">d) <a href="https://github.com/DecBayComp/sktree">sklearn-tree-extension</a>: Research Tools and Extensions</h4>
+<p>There are also open-source research projects and prototypes (like <a href="https://github.com/DecBayComp/sktree">sktree</a>) that extend scikit-learn trees to better support categorical variables natively, but these are early-stage and less mature.</p>
+<p>Excerpt from scikit documentation that there is no support for categorical variables, there are libraries that provide robust, natively categorical alternatives.</p>
 </section>
 </section>
-<section id="submission-checklist" class="level2">
-<h2 class="anchored" data-anchor-id="submission-checklist">Submission Checklist ✅</h2>
-<p><strong>Minimum Requirements (Required for Any Points):</strong></p>
-<ul class="task-list">
-<li><label><input type="checkbox">Forked starter repository from <a href="https://github.com/flyaflya/decTreeChallenge.git">https://github.com/flyaflya/decTreeChallenge.git</a></label></li>
-<li><label><input type="checkbox">Cloned repository locally using Cursor (or VS Code)</label></li>
-<li><label><input type="checkbox">Added thoughtful narrative answers to both discussion questions</label></li>
-<li><label><input type="checkbox">Document rendered to HTML successfully</label></li>
-<li><label><input type="checkbox">HTML files uploaded to your forked repository</label></li>
-<li><label><input type="checkbox">GitHub Pages enabled and working</label></li>
-<li><label><input type="checkbox">Site accessible at <code>https://[your-username].github.io/decTreeChallenge/</code></label></li>
-</ul>
-<p><strong>75% Grade Requirements:</strong></p>
-<ul class="task-list">
-<li><label><input type="checkbox">Clear, well-reasoned answer to question 1 about numerical vs categorical encoding</label></li>
-</ul>
-<p><strong>85% Grade Requirements:</strong></p>
-<ul class="task-list">
-<li><label><input type="checkbox">Thorough analysis of question 2 with investigation of official documentation</label></li>
-</ul>
-<p><strong>95% Grade Requirements:</strong></p>
-<ul class="task-list">
-<li><label><input type="checkbox">Professional presentation style appropriate for business audience.</label></li>
-<li><label><input type="checkbox">Specific quote from official documentation of <code>sklearn.tree.DecisionTreeRegressor</code> supporting your analysis</label></li>
-</ul>
-<p><strong>100% Grade Requirements:</strong></p>
-<ul class="task-list">
-<li><label><input type="checkbox">Note on the current state of the art in decision tree implementation for categorical variables in Python.</label></li>
-</ul>
-<p><strong>Report Quality (Critical for Higher Grades):</strong></p>
-<ul class="task-list">
-<li><label><input type="checkbox">Clear, engaging narrative that tells a story</label></li>
-<li><label><input type="checkbox">Focus on the most interesting findings about decision tree feature importance</label></li>
-<li><label><input type="checkbox">Professional writing style (no AI-generated fluff)</label></li>
-<li><label><input type="checkbox">Concise analysis that gets to the point</label></li>
-<li><label><input type="checkbox">Practical insights that would help a real data scientist</label></li>
-<li><label><input type="checkbox">Documentation-based analysis for technical questions</label></li>
-</ul>
+<section id="able-to-handle-both-numerical-and-categorical-data.-however-the-scikit-learn-implementation-does-not-support-categorical-variables-for-now." class="level2">
+<h2 class="anchored" data-anchor-id="able-to-handle-both-numerical-and-categorical-data.-however-the-scikit-learn-implementation-does-not-support-categorical-variables-for-now."><strong>“Able to handle both numerical and categorical data. However, the scikit-learn implementation does not support categorical variables for now.”</strong></h2>
+<p><strong>In summary:</strong><br>
+While classic scikit-learn trees still lack true categorical support, <strong>libraries like CatBoost and LightGBM provide robust, natively categorical alternatives,</strong> making them preferred choices for real-world tasks involving non-ordinal features like zip codes.</p>
+<p><strong>Further Reading/Sources:</strong> - CatBoost: <a href="https://catboost.ai/en/docs/concepts/handling-categorical-features/">Handling categorical features</a> - LightGBM: <a href="https://lightgbm.readthedocs.io/en/latest/Advanced-Topics.html#categorical-feature-support">Categorical feature support</a> - scikit-learn: <a href="https://scikit-learn.org/stable/modules/ensemble.html#categorical-features-support">Categorical features in histogram-based estimators</a></p>
 </section>
 </section>
 

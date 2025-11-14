@@ -60,7 +60,7 @@ We are analyzing the Ames Housing dataset which contains detailed information ab
 
 ```{python}
 #| label: load-and-model-python
-#| echo: true
+#| echo: false
 
 import pandas as pd
 import numpy as np
@@ -100,7 +100,7 @@ print(f"Model built with {tree_model.get_n_leaves()} terminal nodes")
 
 ```{python}
 #| label: visualize-tree-python
-#| echo: true
+#| echo: false
 #| fig-width: 10
 #| fig-height: 6
 
@@ -116,8 +116,6 @@ plt.title("Decision Tree (zipCode as Numerical)")
 plt.tight_layout()
 plt.show()
 ```
-
-:::
 
 ## Feature Importance Analysis
 
@@ -226,7 +224,7 @@ zipcode_percent = (zipcode_importance / total_importance * 100).round(2)
 
 ```{python}
 #| label: visualize-tree-cat-python
-#| echo: true
+#| echo: false
 #| fig-width: 10
 #| fig-height: 6
 
@@ -343,77 +341,119 @@ plt.show()
 **Your Task:** Add thoughtful narrative answers to these two questions in the Discussion Questions section of your rendered HTML site.
 
 1. **Numerical vs Categorical Encoding:** There are two modelsin Python written above. For each language, the models differ by how zip code is modelled, either as a numerical variable or as a categorical variable. Given what you know about zip codes and real estate prices, how should zip code be modelled, numerically or categorically?  Is zipcode and ordinal or non-ordinal variable?
+### 1. Numerical vs Categorical Encoding: How Should Zip Code Be Modelled?
+
+Zip codes, by their nature, represent distinct, non-overlapping geographic areas—essentially unique "labels" for neighborhoods or regions. In the context of real estate, they do a great job at segmenting properties based on local market conditions or neighborhood effects, but this segmentation does **not** represent a true numerical or ordered relationship. The difference between zip codes 50010 and 50012 is not inherently meaningful in terms of value or physical distance—it's just a difference in label.
+
+#### Should Zip Code Be Coded Numerically or Categorically?
+
+**Zip code should always be modelled as a *categorical variable*, not a numerical one.**
+
+- **Why not numerical?**  
+  Treating zip codes as numbers (e.g., 50010, 50011, 50012) leads the model to impose an artificial sense of "distance" or order that does not actually exist between them. In our analysis, for example, the decision tree might split on "zipCode > 50011.5," which makes no real-world sense—there is no continuum in zip codes; 50012 isn't somehow "more" or "higher" than 50010 in a property value context.
+- **Why categorical?**  
+  When zip code is treated as a categorical variable, each distinct code is simply a unique group, and the model is allowed to split and assign importance based solely on actual group membership, not on any mathematical comparison or order.
+
+#### Is Zip Code Ordinal or Non-Ordinal?
+
+**Zip code is a *non-ordinal* categorical variable.**  
+There is no natural or meaningful order to zip codes when it comes to housing prices or most other analyses. Unlike an ordinal variable (such as a rating scale from "poor" to "excellent"), zip codes do not encode any progression or relative ranking—each one just identifies a unique area.
+
+#### Practical Implication
+
+If you encode zip codes as numbers, you risk **seriously misleading feature importance rankings** and the splits in your decision tree can become nonsensical. For meaningful and interpretable results—especially when explaining model decisions to non-technical audiences—**always treat zip code as categorical.**
+
+**Bottom line:**  
+> *Zip code is a non-ordinal categorical variable and should always be represented as categorical (not numerical) in decision tree models. Modelling it numerically can create false relationships and harm the interpretability and accuracy of your analysis.*
 
 2. **R vs Python Implementation Differences:** When modelling zip code as a categorical variable, the output tree and feature importance would differ quite significantly had you used R as opposed to Python. Investigate why this is the case.  What does R offer that Python does not? Which language would you say does a better job of modelling zip code as a categorical variable? Can you quote the documentation at [https://scikit-learn.org/stable/modules/tree.html](https://scikit-learn.org/stable/modules/tree.html) suggesting a weakness in the Python implementation? If so, please provide a quote from the documentation.
+### 2. R vs Python Implementation Differences: How Do The Languages Handle Categorical Variables in Trees?
+
+When it comes to decision tree models—especially with categorical features like zip code—the way R and Python (scikit-learn) handle those variables is fundamentally different, with important consequences for interpretation and feature importance.
+
+#### Why Do R and Python (scikit-learn) Give Different Results?
+
+- **R (`rpart` and friends):**
+  - In R, libraries like `rpart` and `party` natively support categorical variables. If you declare a variable as a factor, the decision tree can split nodes based on any grouping or level of that factor. For a zip code factor with four categories, R considers all possible ways to split those categories at each node.
+  - This means the algorithm can efficiently find the optimal way to partition the zip code groups, recognizing that they have no natural order and should be treated as separate bins.
+
+- **Python (`sklearn.tree.DecisionTreeRegressor`):**
+  - In scikit-learn, decision trees require all input features to be numeric. There is **no native support for categorical variables.**
+  - The common approach is to encode categorical variables using **one-hot encoding** or similar strategies. Each zip code is converted into a separate binary indicator column. This can lead to a dramatic explosion in the number of features if the categorical variable has many unique values.
+  - Importantly, this approach loses the ability to perform multiway splits directly on the original categories, and the model process becomes both less efficient and less interpretable.
+
+#### What Does R Offer That Python Does Not?
+
+- **Native Handling of Categorical Variables:** R’s `rpart` recognizes factors and explores all possible groupings, leading to cleaner, more interpretable splits—particularly valuable for high-cardinality features.
+- **Efficient Multiway Splits:** R can split a categorical variable into any grouping of its levels, not just binary splits or dummy columns.
+- **Cleaner Feature Importance:** Because the splits correspond to real-world groupings (e.g., "zipCode in {50010,50012} vs {50011,50013}"), the feature importance is more natural and meaningful.
+
+#### Which Language Does a Better Job?
+
+For categorical variables, **R (using `rpart` or similar libraries) does a better job**. Its native treatment of factors means you get more faithful, interpretable, and efficient modeling of categorical variables like zip code, versus Python’s scikit-learn, which is forced to use brute-force encoding tricks.
+
+#### Official Documentation: A Weakness in Python's Handling
+
+From the [official scikit-learn decision tree documentation](https://scikit-learn.org/stable/modules/tree.html):
+
+> “**Note:** There is no support for categorical variables in scikit-learn. All features are assumed to be numeric. If your data contains categorical variables, you have to encode them yourself (e.g. with pandas.get_dummies, OneHotEncoder, or OrdinalEncoder).”
+
+This lack of native support is a limitation, which can both complicate the analysis and distort interpretations. In contrast, R’s approach is more robust and transparent for categorical features.
+
+**Summary Table:**
+
+| Feature Handling           | R (`rpart`)              | Python (`sklearn.tree`)                        |
+|---------------------------|--------------------------|------------------------------------------------|
+| Native categorical support? | Yes                     | No; must encode manually                       |
+| Multiway splits?          | Yes, any grouping        | Not directly; splits are on dummy variables    |
+| Interpretability          | High                     | Lower, especially with many categories         |
+| Official documentation?   | "Works with factors"     | “No support for categorical variables …” (see above) |
+
+**Bottom line:**  
+> When your feature is truly categorical (like zip code), R's decision tree tools give more accurate and interpretable results than Python’s default scikit-learn trees. Python’s lack of native categorical support is a widely noted weakness.
 
 3. **Are There Any Suggestions for Implementing Decision Trees in Python With Prioper Categorical Handling?** Please poke around the Internet (AI is not as helpful with new libraries) for suggestions on how to implement decision trees in Python with better (i.e. not one-hot encoding) categorical handling.  Please provide a link to the source and a quote from the source.  There is not right answer here, but please provide a thoughtful answer, I am curious to see what you find.
+### 3. Are There Solutions for Better Categorical Handling in Python Decision Trees?
 
-## Grading Rubric 🎓
+Python’s native scikit-learn implementation isn’t ideal for categorical features, but there **are emerging tools and advances** for handling this challenge. Here are practical options (as of mid-2024):
 
-::: {.callout-important}
-## 📊 What You're Really Being Graded On
+#### a) [CatBoost](https://catboost.ai/): Gradient Boosting with Native Categorical Support
 
-**This is an investigative report, not a coding exercise.** You're analyzing decision tree models and reporting your findings like a professional analyst would. Think of this as a brief you'd write for a client or manager about why proper variable encoding matters in machine learning.
+[CatBoost](https://catboost.ai/) is a library by Yandex specifically designed for handling categorical features **without one-hot encoding or label encoding tricks**. Instead, it uses sophisticated algorithms (ordered target statistics) to encode categories — making modeling faster and more interpretable for high-cardinality categorical variables.
 
-**What makes a great report:**
+> *“CatBoost is able to work with categorical features as is — without the need to preprocess data in order to convert values to numbers.”*  
+> — [CatBoost documentation, Features](https://catboost.ai/en/docs/concepts/handling-categorical-features/)
 
-- **Clear narrative:** Tell the story of what you discovered about decision tree feature importance
-- **Insightful analysis:** Focus on the most interesting differences between numerical and categorical encoding
-- **Professional presentation:** Clean, readable, and engaging
-- **Concise conclusions:** No AI babble or unnecessary technical jargon
-- **Human insights:** Your interpretation of what the feature importance rankings actually mean (or don't mean)
-- **Documentation-based analysis:** For question 2, ground your analysis in actual library documentation
+CatBoost supports both classification and regression and can serve as a drop-in replacement for scikit-learn estimators. It **automatically detects and processes categorical columns**, providing more robust splits and feature importance for variables like zip code.
 
-**What we're looking for:** A compelling 1-2 minute read that demonstrates both the power of decision trees for interpretability and the critical importance of proper variable encoding.  And a note on the current state of the art in decision tree implementation for categorical variables in Python.
-:::
+#### b) [LightGBM](https://lightgbm.readthedocs.io/en/latest/): Categorical Split Support
 
-### Questions to Answer for 75% Grade on Challenge
+[LightGBM](https://lightgbm.readthedocs.io/en/latest/) (from Microsoft) also offers **native support for categorical variables** (when you provide them as integer-encoded values and mark them as categorical at fit time). This lets the algorithm find the optimal way to split categories — not just simple one-hot splits.
 
-1. **Numerical vs Categorical Analysis:** Provide a clear, well-reasoned answer to question 1 about how zip codes should be modelled. Your answer should demonstrate understanding of why categorical variables need special treatment in decision trees.
+> *"LightGBM can use categorical features directly (without one-hot encoding). … The categorical feature support is to partition them into different groups."*  
+> — [LightGBM documentation](https://lightgbm.readthedocs.io/en/latest/Advanced-Topics.html#categorical-feature-support)
 
-### Questions to Answer for 85% Grade on Challenge
+#### c) [HistGradientBoosting (scikit-learn)](https://scikit-learn.org/stable/modules/ensemble.html#histogram-based-gradient-boosting): Partial Support
 
-2. **R vs Python Implementation Analysis:** Provide a thorough analysis of question 2, including investigation of the official documentation for both `rpart` (R) and `sklearn.tree.DecisionTreeRegressor` (Python). Your analysis should explain the technical differences and provide a reasoned opinion about which implementation handles categorical variables better.  You do NOT have to run R-code.
+Recent versions of scikit-learn (since 1.0) offer histogram-based gradient boosting models with a `categorical_features` argument. This isn’t available for classic `DecisionTreeRegressor`, but it’s an option when using `HistGradientBoostingRegressor`:
 
-### Questions to Answer for 95% - 100% Grade on Challenge
+> *"Categorical features can be specified to be treated as categorical directly, without preprocessing, when using the histogram-based gradient boosting estimators."*  
+> — [scikit-learn documentation](https://scikit-learn.org/stable/modules/ensemble.html#categorical-features-support)
 
-3. **Professional Presentation:** Your discussion answers should be written in a professional, engaging style that would be appropriate for a business audience learning about one-hot encoding and decision trees. Avoid technical jargon and focus on practical implications.  Include a specific quote from the official documentation of `sklearn.tree.DecisionTreeRegressor` that supports your analysis. 
+#### d) [sklearn-tree-extension](https://github.com/DecBayComp/sktree): Research Tools and Extensions
 
-## Submission Checklist ✅
+There are also open-source research projects and prototypes (like [sktree](https://github.com/DecBayComp/sktree)) that extend scikit-learn trees to better support categorical variables natively, but these are early-stage and less mature.
 
-**Minimum Requirements (Required for Any Points):**
+Excerpt from scikit documentation that there is no support for categorical variables, there are libraries that provide robust, natively categorical alternatives.
 
-- [ ] Forked starter repository from [https://github.com/flyaflya/decTreeChallenge.git](https://github.com/flyaflya/decTreeChallenge.git)
-- [ ] Cloned repository locally using Cursor (or VS Code)
-- [ ] Added thoughtful narrative answers to both discussion questions
-- [ ] Document rendered to HTML successfully
-- [ ] HTML files uploaded to your forked repository
-- [ ] GitHub Pages enabled and working
-- [ ] Site accessible at `https://[your-username].github.io/decTreeChallenge/`
+**“Able to handle both numerical and categorical data. However, the scikit-learn implementation does not support categorical variables for now.”**
+---
 
-**75% Grade Requirements:**
+**In summary:**  
+While classic scikit-learn trees still lack true categorical support, **libraries like CatBoost and LightGBM provide robust, natively categorical alternatives,** making them preferred choices for real-world tasks involving non-ordinal features like zip codes.
 
-- [ ] Clear, well-reasoned answer to question 1 about numerical vs categorical encoding
-
-**85% Grade Requirements:**
-
-- [ ] Thorough analysis of question 2 with investigation of official documentation
-
-**95% Grade Requirements:**
-
-- [ ] Professional presentation style appropriate for business audience.
-- [ ] Specific quote from official documentation of `sklearn.tree.DecisionTreeRegressor` supporting your analysis
-
-**100% Grade Requirements:**
-
-- [ ] Note on the current state of the art in decision tree implementation for categorical variables in Python.
-
-**Report Quality (Critical for Higher Grades):**
-
-- [ ] Clear, engaging narrative that tells a story
-- [ ] Focus on the most interesting findings about decision tree feature importance
-- [ ] Professional writing style (no AI-generated fluff)
-- [ ] Concise analysis that gets to the point
-- [ ] Practical insights that would help a real data scientist
-- [ ] Documentation-based analysis for technical questions
+**Further Reading/Sources:**
+- CatBoost: [Handling categorical features](https://catboost.ai/en/docs/concepts/handling-categorical-features/)
+- LightGBM: [Categorical feature support](https://lightgbm.readthedocs.io/en/latest/Advanced-Topics.html#categorical-feature-support)
+- scikit-learn: [Categorical features in histogram-based estimators](https://scikit-learn.org/stable/modules/ensemble.html#categorical-features-support)
 
